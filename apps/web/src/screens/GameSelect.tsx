@@ -41,6 +41,23 @@ export function GameSelect({ onPick }: { onPick: (gameId: string) => void }) {
       <div className="carts">
         {games.map((g) => {
           const client = CLIENT_GAMES[g.id];
+          if (client?.theme === 'cube') {
+            return (
+              <button key={g.id} type="button" className="disc-case" onClick={() => onPick(g.id)}>
+                <span className="disc">
+                  <span className="disc-art" style={{ background: client.labelArt }} />
+                  <span className="disc-name">{g.name}</span>
+                  <span className="disc-hole" />
+                </span>
+                <span className="cart-meta">
+                  {g.tagline}
+                  <small>
+                    {g.minPlayers}–{g.maxPlayers} players · {g.modes.length} modes
+                  </small>
+                </span>
+              </button>
+            );
+          }
           return (
             <button key={g.id} type="button" className="cart" onClick={() => onPick(g.id)}>
               <span className="cart-grip" />

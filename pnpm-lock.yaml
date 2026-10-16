@@ -42,6 +42,9 @@ importers:
       '@fontsource/chakra-petch':
         specifier: 5.3.0
         version: 5.3.0
+      '@fontsource/fredoka':
+        specifier: 5.3.0
+        version: 5.3.0
       '@fontsource/lilita-one':
         specifier: 5.3.0
         version: 5.3.0
@@ -249,6 +252,9 @@ packages:
 
   '@fontsource/chakra-petch@5.3.0':
     resolution: {integrity: sha512-QZvbM/q2R6n1pg2x+TJPftZmBNS+ADU37L4Z4L/6UJIz+JZ/SRaEf8usPFRiP7Ht28sIideMu/Bm1SnGlSrwNw==}
+
+  '@fontsource/fredoka@5.3.0':
+    resolution: {integrity: sha512-s2IhjQ50wDnKkkaKmjhtL0rxQg6ITsVusiipM3m7zUwVZZbbCKsscNDkngwp28xVzfIt7neWrkgU1qKqyTycQg==}
 
   '@fontsource/lilita-one@5.3.0':
     resolution: {integrity: sha512-bNW3tD+m5pOsAQpW/NvtRbFthFe+B73hDJK2DLLCFCtF+1p+UMBgo7ibxdcb9Sftr06LKAVbt080wiMdSqGbOg==}
@@ -818,6 +824,8 @@ snapshots:
     optional: true
 
   '@fontsource/chakra-petch@5.3.0': {}
+
+  '@fontsource/fredoka@5.3.0': {}
 
   '@fontsource/lilita-one@5.3.0': {}
 

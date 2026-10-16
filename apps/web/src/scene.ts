@@ -1,9 +1,13 @@
 import * as THREE from 'three';
 import { getState, subscribe } from './net.ts';
 import { playerColor } from './colors.ts';
+import { buildCubeWorld, makeBubble, makeHalo } from './cubeWorld.ts';
 
 /** Render at a fraction of screen size and let the browser blur it up — the N64 look. */
-const RENDER_SCALE = 0.38;
+const RENDER_SCALE = { n64: 0.38, cube: 0.85 } as const;
+type Theme = keyof typeof RENDER_SCALE;
+/** Games that use the GameCube-style world instead of the village. */
+const CUBE_GAMES = new Set(['tunedin']);
 const FIGURE_RING = 5.2;
 
 type Mood = 'day' | 'dusk' | 'night' | 'dawn';
@@ -57,7 +61,7 @@ function colored(geo: THREE.BufferGeometry, color: THREE.ColorRepresentation, ji
 
 const vcMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
 
-function buildVillage(scene: THREE.Scene) {
+function buildVillage(scene: THREE.Object3D) {
   const rand = rng(64);
 
   const ground = new THREE.PlaneGeometry(150, 150, 30, 30);
@@ -160,7 +164,7 @@ function makeFigure(color: string): Figure {
 }
 
 export function mountScene(container: HTMLDivElement): () => void {
-  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
   renderer.setPixelRatio(1);
   renderer.domElement.className = 'scene-canvas';
   container.appendChild(renderer.domElement);
@@ -175,10 +179,14 @@ export function mountScene(container: HTMLDivElement): () => void {
   sun.position.set(20, 30, 10);
   const fireLight = new THREE.PointLight(0xff8a2a, 1, 18, 1.4);
   fireLight.position.y = 1.5;
-  scene.add(ambient, sun, fireLight);
+  const village = new THREE.Group();
+  const cube = buildCubeWorld();
+  cube.group.visible = false;
+  scene.add(ambient, sun, village, cube.group);
+  village.add(fireLight);
 
   const celestial = new THREE.Mesh(new THREE.IcosahedronGeometry(3, 1), new THREE.MeshBasicMaterial({ color: 0xfff07a, fog: false }));
-  scene.add(celestial);
+  village.add(celestial);
 
   const starGeo = new THREE.BufferGeometry();
   const starPos = new Float32Array(300 * 3);
@@ -190,25 +198,38 @@ export function mountScene(container: HTMLDivElement): () => void {
   }
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
   const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.4, sizeAttenuation: false, fog: false, transparent: true });
-  scene.add(new THREE.Points(starGeo, starMat));
+  village.add(new THREE.Points(starGeo, starMat));
 
-  const { flame, core } = buildVillage(scene);
+  const { flame, core } = buildVillage(village);
   const windows: THREE.Mesh[] = [];
-  scene.traverse((o) => o.userData.window && windows.push(o as THREE.Mesh));
+  village.traverse((o) => o.userData.window && windows.push(o as THREE.Mesh));
 
   const marker = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), new THREE.MeshBasicMaterial({ color: 0xffd400 }));
   marker.visible = false;
-  scene.add(marker);
+  const halo = makeHalo();
+  halo.visible = false;
+  scene.add(marker, halo);
 
   const figures = new Map<string, Figure>();
   let meId: string | null = null;
   let phase: string | undefined;
+  let theme: Theme = 'n64';
 
   const sync = () => {
-    const { lobby, me } = getState();
+    const { lobby, me, browsing } = getState();
     const game = lobby?.game as { phase?: string; players?: { id: string; alive?: boolean }[] } | null | undefined;
     phase = game?.phase;
     meId = me?.id ?? null;
+    const activeGame = lobby ? lobby.gameId : browsing;
+    const nextTheme: Theme = activeGame && CUBE_GAMES.has(activeGame) ? 'cube' : 'n64';
+    if (nextTheme !== theme) {
+      theme = nextTheme;
+      village.visible = theme === 'n64';
+      cube.group.visible = theme === 'cube';
+      for (const f of figures.values()) scene.remove(f.group);
+      figures.clear();
+      resize();
+    }
     const people = lobby
       ? lobby.players.map((p) => ({
           id: p.id,
@@ -226,31 +247,32 @@ export function mountScene(container: HTMLDivElement): () => void {
     people.forEach((p, i) => {
       let f = figures.get(p.id);
       if (!f) {
-        f = makeFigure(p.color);
+        f = theme === 'cube' ? makeBubble(p.color) : makeFigure(p.color);
         figures.set(p.id, f);
         scene.add(f.group);
       }
       const a = (i / people.length) * Math.PI * 2;
-      f.group.position.set(Math.cos(a) * FIGURE_RING, 0, Math.sin(a) * FIGURE_RING);
+      const ring = theme === 'cube' ? FIGURE_RING + 0.8 : FIGURE_RING;
+      f.group.position.set(Math.cos(a) * ring, 0, Math.sin(a) * ring);
       f.group.lookAt(0, 0, 0);
       f.alive = p.alive;
       f.body.visible = p.alive;
       f.grave.visible = !p.alive;
     });
   };
-  sync();
-  const unsubscribe = subscribe(sync);
-
-  const resize = () => {
+  function resize() {
     const w = container.clientWidth;
     const h = container.clientHeight;
-    renderer.setSize(Math.max(1, Math.ceil(w * RENDER_SCALE)), Math.max(1, Math.ceil(h * RENDER_SCALE)), false);
+    const scale = RENDER_SCALE[theme];
+    renderer.setSize(Math.max(1, Math.ceil(w * scale)), Math.max(1, Math.ceil(h * scale)), false);
     camera.aspect = w / Math.max(1, h);
     camera.updateProjectionMatrix();
-  };
+  }
   const observer = new ResizeObserver(resize);
   observer.observe(container);
   resize();
+  sync();
+  const unsubscribe = subscribe(sync);
 
   const sky = new THREE.Color();
   const target = { sky: new THREE.Color(), ambient: new THREE.Color(), sun: new THREE.Color(), celestial: new THREE.Color() };
@@ -264,8 +286,15 @@ export function mountScene(container: HTMLDivElement): () => void {
     const dt = Math.min(0.1, (nowMs - last) / 1000);
     last = nowMs;
     const t = (nowMs - start) / 1000;
-    const mood = MOODS[moodFor(phase, t)];
     const k = 1 - Math.exp(-dt * 1.5);
+    if (theme === 'cube') {
+      renderCube(t, k);
+      return;
+    }
+    const mood = MOODS[moodFor(phase, t)];
+    ambient.groundColor.set(0x2a3a1a);
+    (scene.fog as THREE.Fog).near = 18;
+    (scene.fog as THREE.Fog).far = 62;
 
     target.sky.set(mood.sky);
     sky.lerp(target.sky, k);
@@ -303,9 +332,43 @@ export function mountScene(container: HTMLDivElement): () => void {
       i++;
     }
     if (!meId || !figures.has(meId)) marker.visible = false;
+    halo.visible = false;
 
     renderer.render(scene, camera);
   };
+
+  const cubeAmbient = new THREE.Color(0xb9a6ff);
+  const cubeGround = new THREE.Color(0x1a0f45);
+  function renderCube(t: number, k: number) {
+    const bg = cube.update(t, phase, k);
+    (scene.background as THREE.Color).copy(bg);
+    scene.fog!.color.copy(bg);
+    (scene.fog as THREE.Fog).near = 20;
+    (scene.fog as THREE.Fog).far = 80;
+    ambient.color.copy(cubeAmbient);
+    ambient.groundColor.copy(cubeGround);
+    sun.color.set(0xffffff);
+    sun.intensity = 1.8;
+
+    const orbit = t * 0.08;
+    camera.position.set(Math.cos(orbit) * 15, 7, Math.sin(orbit) * 15);
+    camera.lookAt(0, 2.2, 0);
+
+    marker.visible = false;
+    halo.visible = false;
+    let i = 0;
+    for (const [id, f] of figures) {
+      f.body.position.y = Math.sin(t * 2 + i * 0.9) * 0.18;
+      f.body.rotation.y = Math.sin(t * 0.7 + i) * 0.3;
+      if (id === meId) {
+        halo.visible = true;
+        halo.position.set(f.group.position.x, 2.6 + Math.sin(t * 2.5) * 0.1, f.group.position.z);
+        halo.rotation.set(Math.PI / 2, 0, t);
+      }
+      i++;
+    }
+    renderer.render(scene, camera);
+  }
   frame();
 
   return () => {

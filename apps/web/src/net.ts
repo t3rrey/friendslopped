@@ -8,6 +8,8 @@ export interface NetState {
   games: GameInfo[];
   lobbies: LobbySummary[];
   lobby: LobbyState | null;
+  /** Game whose lobby browser is open (before joining a lobby). */
+  browsing: string | null;
   /** serverTime ≈ Date.now() + clockOffset */
   clockOffset: number;
   toast: { id: number; text: string; tone: 'error' | 'info' } | null;
@@ -22,6 +24,7 @@ let state: NetState = {
   games: [],
   lobbies: [],
   lobby: null,
+  browsing: null,
   clockOffset: 0,
   toast: null,
 };
@@ -47,6 +50,8 @@ export const getState = () => state;
 export function useNet<T>(select: (s: NetState) => T): T {
   return useSyncExternalStore(subscribe, () => select(state));
 }
+
+export const browse = (gameId: string | null) => set({ browsing: gameId });
 
 export const savedName = () => localStorage.getItem(NAME_KEY) ?? '';
 
