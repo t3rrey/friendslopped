@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react';
 import type { ClientMessage, GameInfo, LobbyState, LobbySummary, ServerMessage } from '@friendslopped/shared';
-import type { MafiaView } from '@friendslopped/mafia';
 import { sfx } from './sfx.ts';
 
 export interface NetState {
@@ -119,15 +118,21 @@ function receive(msg: ServerMessage) {
   }
 }
 
-/** Sound cues for things that happened between two lobby snapshots. */
+/** Sound cues for things that happened between two lobby snapshots. Works for any game view with a `phase`. */
+interface CueView {
+  phase?: string;
+  announcement?: { kind: string }[];
+}
+
 function playCues(prev: LobbyState | null, next: LobbyState | null) {
-  const a = prev?.game as MafiaView | null | undefined;
-  const b = next?.game as MafiaView | null | undefined;
+  const a = prev?.game as CueView | null | undefined;
+  const b = next?.game as CueView | null | undefined;
   if (prev && next && next.players.length > prev.players.length) sfx.join();
-  if (!b || a?.phase === b.phase) return;
+  if (!b?.phase || a?.phase === b.phase) return;
   if (b.phase === 'night') sfx.night();
   else if (b.phase === 'gameOver') sfx.fanfare();
-  else if (b.announcement.some((e) => e.kind === 'death')) sfx.death();
+  else if (b.announcement?.some((e) => e.kind === 'death')) sfx.death();
+  else if (b.phase === 'reveal') sfx.join();
   else sfx.phase();
 }
 

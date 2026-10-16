@@ -14,6 +14,7 @@
   "dependencies": {
     "@friendslopped/mafia": "workspace:*",
     "@friendslopped/shared": "workspace:*",
+    "@friendslopped/tunedin": "workspace:*",
     "ws": "8.22.0"
   }
 }

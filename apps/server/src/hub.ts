@@ -177,7 +177,7 @@ export class Hub {
       case 'startGame': {
         if (!lobby || !isHost) return fail('Only the host can start.');
         if (lobby.game) return;
-        const error = lobby.def.startError(lobby.config, lobby.playerIds.length);
+        const error = lobby.def.startError(lobby.config, lobby.playerIds.length, lobby.modeId);
         if (error) return fail(error);
         lobby.game = lobby.def.create({
           players: lobby.playerIds.map((id) => ({ id, name: this.sessions.get(id)!.name })),
@@ -271,7 +271,7 @@ export class Hub {
         return { id, name: p.name, color: lobby.colors.get(id) ?? 0, connected: p.conns.size > 0, isHost: id === lobby.hostId };
       }),
       config: lobby.config,
-      startError: lobby.def.startError(lobby.config, lobby.playerIds.length),
+      startError: lobby.def.startError(lobby.config, lobby.playerIds.length, lobby.modeId),
       game: lobby.game ? lobby.game.view(viewerId) : null,
     };
   }

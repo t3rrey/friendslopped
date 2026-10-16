@@ -518,6 +518,92 @@ input::placeholder { color: #7177a8; }
 /* night dims the UI a touch */
 .phase-night .pcard:not(.pcard-target):not(.pcard-me) { filter: brightness(0.75) saturate(0.7); }
 
+/* ==========================================================================
+   Tuned In
+   ========================================================================== */
+
+.tunedin { width: min(1280px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: 22px; flex: 1; }
+.tunedin-body { display: grid; grid-template-columns: 1fr 320px; gap: 26px; align-items: start; }
+.tunedin-main { display: flex; flex-direction: column; gap: 18px; align-items: stretch; }
+.icon-dial { background: conic-gradient(from -90deg, #ffc20e 0 60deg, #e4202e 60deg 120deg, #00a651 120deg 180deg, #2a5db0 180deg); }
+
+.clue-bubble {
+  align-self: center; position: relative; max-width: 100%;
+  padding: 12px 28px; text-align: center;
+  background: var(--paper); color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 18px; box-shadow: 0 5px 0 var(--ink);
+  display: flex; flex-direction: column;
+  animation: pop-in 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.clue-bubble::after {
+  content: ''; position: absolute; left: 50%; bottom: -14px; width: 20px; height: 20px; transform: translateX(-50%) rotate(45deg);
+  background: var(--paper); border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink);
+}
+.clue-text { font-family: var(--display); font-size: clamp(26px, 4vw, 40px); line-height: 1.1; word-break: break-word; }
+.clue-bubble small { font-weight: 700; opacity: 0.65; }
+.clue-waiting { font-family: var(--display); font-size: 22px; opacity: 0.8; }
+
+.dial { position: relative; width: min(680px, 100%); align-self: center; user-select: none; }
+.dial svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: none; }
+.dial-editable svg { cursor: grab; }
+.dial-editable svg:active { cursor: grabbing; }
+.dial svg:focus-visible { outline: 3px solid var(--yellow); outline-offset: 6px; border-radius: 12px; }
+.dial-ends { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.dial-end {
+  font-family: var(--display); font-size: clamp(18px, 2.6vw, 26px); padding: 4px 14px;
+  border: 3px solid var(--ink); border-radius: 10px; box-shadow: 0 4px 0 var(--ink);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45); max-width: 48%;
+}
+.dial-left { background: linear-gradient(180deg, #4f8fff, var(--blue)); }
+.dial-right { background: linear-gradient(180deg, #ff6b74, var(--red)); text-align: right; }
+.dial-rim { fill: var(--ink); }
+.dial-face { fill: #2b2f6e; }
+.dial-bands { transform-box: view-box; transform-origin: 0 0; animation: sweep 700ms cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.dial-bands path { stroke: var(--ink); stroke-width: 2; }
+.dial-band-label { fill: #fff; font-family: var(--display); font-size: 26px; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--ink); stroke-width: 4px; }
+@keyframes sweep { from { transform: rotate(-90deg) scale(0.2); opacity: 0; } }
+.dial-tick { stroke: rgba(255, 255, 255, 0.45); stroke-width: 3; stroke-linecap: round; }
+.dial-hub { fill: var(--yellow); stroke: var(--ink); stroke-width: 5; }
+.needle line { stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 3px 0 rgba(10, 11, 36, 0.8)); }
+.needle circle { stroke: var(--ink); stroke-width: 4; }
+.needle text { font-family: var(--display); font-size: 13px; fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.needle-mine line { stroke-width: 9; }
+.needle-mine text { font-size: 12px; }
+.needle { transition: transform 120ms; }
+
+.clue-form { width: min(520px, 100%); }
+.points-pop { font-family: var(--display); font-size: 54px; color: var(--yellow); text-shadow: 0 5px 0 var(--ink); margin: 0; animation: pop-in 500ms cubic-bezier(0.3, 1.8, 0.5, 1) both; }
+
+.scoreboard { position: sticky; top: 20px; }
+.score-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.score-row {
+  display: flex; align-items: center; gap: 10px; padding: 6px 10px;
+  border: 3px solid var(--ink); border-radius: 8px; background: rgba(0, 0, 0, 0.28);
+}
+.score-me { box-shadow: inset 0 0 0 2px var(--yellow); }
+.score-name { flex: 1; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-pts { font-family: var(--display); font-weight: 400; font-size: 24px; color: var(--yellow); text-shadow: 0 2px 0 var(--ink); min-width: 28px; text-align: right; }
+.round-pts { font-family: var(--display); color: #7ef0a8; text-shadow: 0 2px 0 var(--ink); animation: pop-in 400ms both; }
+.psychic-tag, .lock-tag { margin-left: 6px; }
+.avatar-sm { width: 30px; height: 30px; font-size: 15px; border-width: 2px; }
+
+.team-block { padding: 10px; border: 3px solid var(--ink); border-radius: 10px; margin-bottom: 12px; background: var(--team-bg); opacity: 0.75; }
+.team-block-active { opacity: 1; box-shadow: 0 0 0 3px var(--yellow); }
+.team-block h3 { margin: 0 0 8px; font-family: var(--display); font-weight: 400; font-size: 22px; display: flex; justify-content: space-between; text-shadow: 0 2px 0 var(--ink); }
+.team-block h3 b { font-weight: 400; color: var(--yellow); font-size: 28px; }
+.team-red { --team-bg: linear-gradient(180deg, rgba(196, 24, 38, 0.85), rgba(80, 8, 16, 0.9)); }
+.team-blue { --team-bg: linear-gradient(180deg, rgba(36, 104, 220, 0.85), rgba(10, 30, 90, 0.9)); }
+.team-chip {
+  font-family: var(--display); font-size: 20px; padding: 2px 14px; border: 3px solid var(--ink); border-radius: 999px;
+  background: var(--team-bg); box-shadow: 0 3px 0 var(--ink); opacity: 0.7;
+}
+.team-chip-active { opacity: 1; transform: scale(1.08); }
+
+@media (max-width: 900px) {
+  .tunedin-body { grid-template-columns: 1fr; }
+  .scoreboard { position: static; }
+}
+
 /* ---- responsive ----------------------------------------------------------- */
 
 @media (max-width: 900px) {

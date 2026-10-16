@@ -2,6 +2,8 @@ import type { ComponentType, ReactNode } from 'react';
 import type { LobbyState } from '@friendslopped/shared';
 import { MafiaGame } from './mafia/MafiaGame.tsx';
 import { MafiaRules, MafiaSettings } from './mafia/MafiaSettings.tsx';
+import { TunedInGame } from './tunedin/TunedInGame.tsx';
+import { TunedInRules, TunedInSettings } from './tunedin/TunedInSettings.tsx';
 
 export interface ClientGame {
   icon: ReactNode;
@@ -19,5 +21,12 @@ export const CLIENT_GAMES: Record<string, ClientGame> = {
     Settings: MafiaSettings,
     Rules: MafiaRules,
     Game: MafiaGame,
+  },
+  tunedin: {
+    icon: '◠',
+    labelArt: 'conic-gradient(from -90deg at 50% 100%, #ffc20e 0 25deg, #00a651 25deg 50deg, #e4202e 50deg 70deg, #00a651 70deg 95deg, #ffc20e 95deg 120deg, #2a5db0 120deg 180deg, transparent 180deg), linear-gradient(180deg, #2a5db0, #12205a)',
+    Settings: TunedInSettings,
+    Rules: TunedInRules,
+    Game: TunedInGame,
   },
 };

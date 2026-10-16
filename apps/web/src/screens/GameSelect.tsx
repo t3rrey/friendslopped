@@ -4,7 +4,7 @@ import { connect, useNet } from '../net.ts';
 import { Button, ChunkyText } from '../ui.tsx';
 import { CLIENT_GAMES } from '../games.tsx';
 
-const LOCKED = ['Coming Soon', 'Coming Soon', 'Coming Soon'];
+const LOCKED = ['Coming Soon', 'Coming Soon'];
 
 export function GameSelect({ onPick }: { onPick: (gameId: string) => void }) {
   const games = useNet((s) => s.games);

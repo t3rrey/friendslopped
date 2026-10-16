@@ -20,6 +20,6 @@ export interface GameDefinition<Config = unknown> {
   defaultConfig(): Config;
   normalizeConfig(raw: unknown, prev: Config): Config;
   /** Why the game can't start with this config/player count, or null. */
-  startError(config: Config, playerCount: number): string | null;
+  startError(config: Config, playerCount: number, modeId: string): string | null;
   create(opts: { players: { id: string; name: string }[]; config: Config; modeId: string; now: number }): GameInstance;
 }

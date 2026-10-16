@@ -26,6 +26,9 @@ importers:
       '@friendslopped/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@friendslopped/tunedin':
+        specifier: workspace:*
+        version: link:../../packages/tunedin
       ws:
         specifier: 8.22.0
         version: 8.22.0
@@ -48,6 +51,9 @@ importers:
       '@friendslopped/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@friendslopped/tunedin':
+        specifier: workspace:*
+        version: link:../../packages/tunedin
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -77,6 +83,8 @@ importers:
   packages/mafia: {}
 
   packages/shared: {}
+
+  packages/tunedin: {}
 
 packages:
 

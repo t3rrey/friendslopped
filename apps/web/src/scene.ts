@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import type { MafiaView, Phase } from '@friendslopped/mafia';
 import { getState, subscribe } from './net.ts';
 import { playerColor } from './colors.ts';
 
@@ -15,23 +14,22 @@ const MOODS: Record<Mood, { sky: number; ambient: number; sun: number; sunIntens
   dawn: { sky: 0xf6b48a, ambient: 0xa08ab0, sun: 0xffd2a0, sunIntensity: 1.6, fire: 1.2, celestial: 0xffd080 },
 };
 
-function moodFor(phase: Phase | undefined, idle: number): Mood {
-  switch (phase) {
-    case 'night':
-      return 'night';
-    case 'dawn':
-      return 'dawn';
-    case 'day':
-    case 'vote':
-    case 'gameOver':
-      return 'day';
-    case 'reveal':
-    case 'verdict':
-      return 'dusk';
-    default:
-      // Outside a game the sky slowly cycles.
-      return (['day', 'dusk', 'night', 'dawn'] as const)[Math.floor(idle / 20) % 4]!;
-  }
+// Lighting per game phase (Mafia and Tuned In). Unknown phases cycle slowly.
+const PHASE_MOODS: Record<string, Mood> = {
+  night: 'night',
+  dawn: 'dawn',
+  day: 'day',
+  vote: 'day',
+  gameOver: 'day',
+  reveal: 'dusk',
+  verdict: 'dusk',
+  clue: 'dusk',
+  guess: 'day',
+  counter: 'dusk',
+};
+
+function moodFor(phase: string | undefined, idle: number): Mood {
+  return (phase && PHASE_MOODS[phase]) || (['day', 'dusk', 'night', 'dawn'] as const)[Math.floor(idle / 20) % 4]!;
 }
 
 /** Deterministic PRNG so the village looks the same every visit. */
@@ -204,18 +202,18 @@ export function mountScene(container: HTMLDivElement): () => void {
 
   const figures = new Map<string, Figure>();
   let meId: string | null = null;
-  let phase: Phase | undefined;
+  let phase: string | undefined;
 
   const sync = () => {
     const { lobby, me } = getState();
-    const game = lobby?.game as MafiaView | null | undefined;
+    const game = lobby?.game as { phase?: string; players?: { id: string; alive?: boolean }[] } | null | undefined;
     phase = game?.phase;
     meId = me?.id ?? null;
     const people = lobby
       ? lobby.players.map((p) => ({
           id: p.id,
           color: playerColor(p.color),
-          alive: game ? (game.players.find((g) => g.id === p.id)?.alive ?? false) : true,
+          alive: game?.players?.find((g) => g.id === p.id)?.alive !== false,
         }))
       : [];
     const ids = new Set(people.map((p) => p.id));
