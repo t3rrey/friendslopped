@@ -1,0 +1,19 @@
+{
+  "name": "@friendslopped/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "NODE_ENV=production tsx src/index.ts",
+    "typecheck": "tsc -p .",
+    "bots": "tsx src/bots.ts"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.2"
+  },
+  "dependencies": {
+    "@friendslopped/mafia": "workspace:*",
+    "@friendslopped/shared": "workspace:*",
+    "ws": "8.22.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "friendslopped",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @friendslopped/server --filter @friendslopped/web dev",
+    "build": "pnpm --filter @friendslopped/web build",
+    "start": "pnpm --filter @friendslopped/server start",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "bots": "pnpm --filter @friendslopped/server bots"
+  },
+  "packageManager": "pnpm@11.12.0",
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}
